@@ -1,485 +1,332 @@
-// ========================================
-// Configuration & Constants
-// ========================================
+// ==================== CONFIG ======================
+const BAND_PASS = "band2026";
+const PROD_PASS = "prod2026";
+const ADMIN_PASS = "admin123"; // change before going live
 
-const CONFIG = {
-    // Replace with your deployed Google Apps Script Web App URL
-    WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbw1Q1ssbToaD5PZLjLTR7VNRdPvPHC-v0nYndUMWXT5PmGUXrrpxDAJCggJ9tP_afx5cQ/exec',
-    
-    // Team access code (must match backend)
-    ACCESS_CODE: 'TEAM2026',
-    
-    // Approved team members structure
-    APPROVED_TEAM: {
-        lead_vocal: ['Jacinta Samson'],
-        instrumentalist: [
-            'Cyril Alfred (Acoustic Guitar)',
-            'Pst Michael Adedimeji (Keyboard)',
-            'Reuben Garba (Bass Guitar)',
-            'Isaac Aleyideno (Lead Guitar)',
-            'Mordecai James (Drum)',
-            'Mishack (Keyboardist)'
-        ],
-        bgvs: [
-            'Elijah Amos',
-            'Chioma Chukwuma',
-            'Oyi Favour',
-            'Omotola',
-            'Love Daniel',
-            'Marvel Clifford',
-            'Emmanuel Anierobi',
-            'Grace Ayuba',
-            'Mercy Kingsley',
-            'Daniel David'
-        ]
-    }
+// ⚠️ Replace with your deployed Google Apps Script URL
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyppFrFJbPN0kqnu1jvbnF8R7J2HEJtUrbGRZm3ZEDh7esSOA7TlvxdF9bz0Ro3OlFo/exec";
+
+// ⚠️ Replace these with your real WhatsApp group invite links
+const WHATSAPP_LINKS = {
+  band:       "https://chat.whatsapp.com/GgfdCO9gXytGIT69W4foB1K",
+  audience:   "https://chat.whatsapp.com/GgfdCO9gXytGIT69W4foB1",
+  production: "https://chat.whatsapp.com/GgfdCO9gXytGIT69W4foB1"
 };
 
-// Track registered names to prevent duplicates (client-side check)
-const registeredTeamMembers = new Set();
+// ==================== GLOBAL ======================
+let currentSection = "";
 
-// ========================================
-// DOM Elements
-// ========================================
-
-const DOM = {
-    // Section toggles
-    toggleBtns: document.querySelectorAll('.toggle-btn'),
-    teamSection: document.getElementById('team-section'),
-    audienceSection: document.getElementById('audience-section'),
-    
-    // Team access
-    lockScreen: document.getElementById('team-lock-screen'),
-    accessForm: document.getElementById('access-code-form'),
-    accessInput: document.getElementById('access-code-input'),
-    accessError: document.getElementById('access-error'),
-    
-    // Team form
-    teamForm: document.getElementById('team-form'),
-    teamCategory: document.getElementById('team-category'),
-    teamName: document.getElementById('team-name'),
-    teamEmail: document.getElementById('team-email'),
-    teamPhone: document.getElementById('team-phone'),
-    teamSubmit: document.getElementById('team-submit'),
-    
-    // Audience form
-    audienceForm: document.getElementById('audience-form'),
-    audienceName: document.getElementById('audience-name'),
-    audienceEmail: document.getElementById('audience-email'),
-    audiencePhone: document.getElementById('audience-phone'),
-    audienceSubmit: document.getElementById('audience-submit'),
-    
-    // Modals
-    successModal: document.getElementById('success-modal'),
-    errorModal: document.getElementById('error-modal'),
-    modalDetails: document.getElementById('modal-details'),
-    errorMessage: document.getElementById('error-message')
+// ==================== TAB & MODAL =================
+window.openSection = function(section) {
+  if (section === "band" || section === "production") {
+    currentSection = section;
+    document.getElementById("passwordModal").style.display = "flex";
+    document.getElementById("passInput").value = "";
+    document.getElementById("passError").innerText = "";
+    // Focus the input for quick typing
+    setTimeout(() => document.getElementById("passInput").focus(), 100);
+  } else {
+    showSection(section);
+  }
 };
 
-// ========================================
-// Initialization
-// ========================================
+window.verifyPassword = function() {
+  const val = document.getElementById("passInput").value.trim();
+  const errorEl = document.getElementById("passError");
 
-function init() {
-    setupEventListeners();
-}
+  if (currentSection === "band" && val === BAND_PASS) {
+    document.getElementById("passwordModal").style.display = "none";
+    showSection("band");
+  } else if (currentSection === "production" && val === PROD_PASS) {
+    document.getElementById("passwordModal").style.display = "none";
+    showSection("production");
+  } else {
+    errorEl.innerText = "⛔ Incorrect code. Try again.";
+    document.getElementById("passInput").value = "";
+    document.getElementById("passInput").focus();
+    return;
+  }
+  currentSection = "";
+};
 
-function setupEventListeners() {
-    // Section toggle
-    DOM.toggleBtns.forEach(btn => {
-        btn.addEventListener('click', handleSectionToggle);
-    });
-    
-    // Access code form
-    DOM.accessForm.addEventListener('submit', handleAccessCodeSubmit);
-    
-    // Team category change
-    DOM.teamCategory.addEventListener('change', handleCategoryChange);
-    
-    // Form submissions
-    DOM.teamForm.addEventListener('submit', handleTeamSubmit);
-    DOM.audienceForm.addEventListener('submit', handleAudienceSubmit);
-    
-    // Modal close buttons
-    document.querySelectorAll('.modal-close-btn').forEach(btn => {
-        btn.addEventListener('click', closeModals);
-    });
-    
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-        backdrop.addEventListener('click', closeModals);
-    });
-}
+// FIX: showSection now correctly targets .tab-btn class
+function showSection(id) {
+  // Hide all forms
+  document.querySelectorAll(".form").forEach(f => f.classList.add("hidden"));
 
-// ========================================
-// Section Toggle
-// ========================================
+  // Show the requested form
+  const targetForm = document.getElementById(id);
+  if (targetForm) targetForm.classList.remove("hidden");
 
-function handleSectionToggle(e) {
-    const btn = e.currentTarget;
-    const targetSection = btn.dataset.section;
-    
-    // Update active button
-    DOM.toggleBtns.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    
-    // Switch sections
-    if (targetSection === 'team') {
-        DOM.teamSection.classList.add('active');
-        DOM.audienceSection.classList.remove('active');
-    } else {
-        DOM.audienceSection.classList.add('active');
-        DOM.teamSection.classList.remove('active');
+  // Update active tab highlight
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  // Match button by its onclick attribute value
+  document.querySelectorAll(".tab-btn").forEach(b => {
+    if (b.getAttribute("onclick") && b.getAttribute("onclick").includes(`'${id}'`)) {
+      b.classList.add("active");
     }
-    
-    // Reset forms
-    clearFormErrors(DOM.teamForm);
-    clearFormErrors(DOM.audienceForm);
+  });
+
+  // Scroll to the form smoothly
+  targetForm && targetForm.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-// ========================================
-// Team Access Code
-// ========================================
+// ==================== ROLE DROPDOWN =================
+window.updateRoles = function() {
+  const rolesMap = {
+    instrumentalist: ["Acoustic Guitar", "Keyboardist", "Aux Keys", "Drummer", "Bass Guitar", "Lead Guitar"],
+    vocals:          ["Lead Vocals", "Tenor", "Soprano", "Alto"]
+  };
+  const cat = document.getElementById("roleCategory").value;
+  const roleSelect = document.getElementById("roleOptions");
+  roleSelect.innerHTML = "";
 
-function handleAccessCodeSubmit(e) {
-    e.preventDefault();
-    
-    const code = DOM.accessInput.value.trim();
-    
-    if (code === CONFIG.ACCESS_CODE) {
-        // Success - unlock form
-        DOM.lockScreen.style.display = 'none';
-        DOM.teamForm.classList.remove('hidden');
-        DOM.accessError.classList.remove('show');
-    } else {
-        // Error - show message
-        DOM.accessError.textContent = 'Invalid access code. Please try again.';
-        DOM.accessError.classList.add('show');
-        DOM.accessInput.value = '';
-        DOM.accessInput.focus();
+  if (!cat) {
+    roleSelect.innerHTML = '<option value="">– choose category first –</option>';
+    return;
+  }
+
+  // Add a blank default option
+  const defaultOpt = document.createElement("option");
+  defaultOpt.value = "";
+  defaultOpt.textContent = "– select role –";
+  roleSelect.appendChild(defaultOpt);
+
+  rolesMap[cat].forEach(r => {
+    const opt = document.createElement("option");
+    opt.textContent = r;
+    opt.value = r;
+    roleSelect.appendChild(opt);
+  });
+};
+
+// ==================== FORM VALIDATION ===============
+function validateForm(form) {
+  let valid = true;
+
+  // Clear all previous errors
+  form.querySelectorAll(".validation-error").forEach(e => e.style.display = "none");
+  form.querySelectorAll(".input-error").forEach(e => e.classList.remove("input-error"));
+
+  // Check all required fields
+  form.querySelectorAll("[required]").forEach(inp => {
+    if (!inp.value.trim()) {
+      inp.classList.add("input-error");
+      // Show corresponding error message using data-for matching inp.name
+      const errDiv = form.querySelector(`.validation-error[data-for="${inp.name}"]`);
+      if (errDiv) errDiv.style.display = "block";
+      valid = false;
     }
-}
+  });
 
-// ========================================
-// Team Category Change
-// ========================================
-
-function handleCategoryChange(e) {
-    const category = e.target.value;
-    const nameSelect = DOM.teamName;
-    
-    // Clear existing options
-    nameSelect.innerHTML = '<option value="">Select your name</option>';
-    
-    if (category && CONFIG.APPROVED_TEAM[category]) {
-        // Populate names for selected category
-        const names = CONFIG.APPROVED_TEAM[category];
-        
-        names.forEach(name => {
-            const option = document.createElement('option');
-            option.value = name;
-            option.textContent = name;
-            
-            // Disable if already registered
-            if (registeredTeamMembers.has(name)) {
-                option.disabled = true;
-                option.textContent += ' (Already registered)';
-            }
-            
-            nameSelect.appendChild(option);
-        });
-        
-        nameSelect.disabled = false;
-    } else {
-        nameSelect.disabled = true;
-        nameSelect.innerHTML = '<option value="">Select category first</option>';
-    }
-    
-    // Clear name validation error if exists
-    clearFieldError(nameSelect);
-}
-
-// ========================================
-// Form Validation
-// ========================================
-
-function validateEmail(email) {
+  // Email format check
+  const emailField = form.querySelector('input[type="email"]');
+  if (emailField && emailField.value.trim()) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+    if (!re.test(emailField.value.trim())) {
+      emailField.classList.add("input-error");
+      const err = form.querySelector('.validation-error[data-for="email"]');
+      if (err) { err.style.display = "block"; err.innerText = "Invalid email format"; }
+      valid = false;
+    }
+  }
+
+  // Phone format check (7–20 digits, optional +, spaces, dashes, parens)
+  const phoneField = form.querySelector('input[type="tel"]');
+  if (phoneField && phoneField.value.trim()) {
+    if (!phoneField.value.trim().match(/^[\d\s+\-()\[\]]{7,20}$/)) {
+      phoneField.classList.add("input-error");
+      const err = form.querySelector('.validation-error[data-for="phone"]');
+      if (err) { err.style.display = "block"; err.innerText = "Enter a valid phone number"; }
+      valid = false;
+    }
+  }
+
+  // Band-specific: require role category + specific role selection
+  const type = form.dataset.type;
+  if (type === "band") {
+    const cat = document.getElementById("roleCategory").value;
+    const role = document.getElementById("roleOptions").value;
+    if (!cat) {
+      document.getElementById("roleCategory").classList.add("input-error");
+      valid = false;
+    }
+    if (!role) {
+      document.getElementById("roleOptions").classList.add("input-error");
+      valid = false;
+    }
+  }
+
+  return valid;
 }
 
-function validatePhone(phone) {
-    // Basic validation - not empty
-    return phone.trim().length > 0;
-}
-
-function validateTeamForm() {
-    let isValid = true;
-    
-    // Category validation
-    if (!DOM.teamCategory.value) {
-        showFieldError(DOM.teamCategory, 'Please select a category');
-        isValid = false;
-    } else {
-        clearFieldError(DOM.teamCategory);
-    }
-    
-    // Name validation
-    if (!DOM.teamName.value) {
-        showFieldError(DOM.teamName, 'Please select your name');
-        isValid = false;
-    } else {
-        clearFieldError(DOM.teamName);
-    }
-    
-    // Email validation
-    if (!validateEmail(DOM.teamEmail.value)) {
-        showFieldError(DOM.teamEmail, 'Please enter a valid email address');
-        isValid = false;
-    } else {
-        clearFieldError(DOM.teamEmail);
-    }
-    
-    // Phone validation
-    if (!validatePhone(DOM.teamPhone.value)) {
-        showFieldError(DOM.teamPhone, 'Please enter your phone number');
-        isValid = false;
-    } else {
-        clearFieldError(DOM.teamPhone);
-    }
-    
-    return isValid;
-}
-
-function validateAudienceForm() {
-    let isValid = true;
-    
-    // Name validation
-    if (DOM.audienceName.value.trim().length < 2) {
-        showFieldError(DOM.audienceName, 'Please enter your full name');
-        isValid = false;
-    } else {
-        clearFieldError(DOM.audienceName);
-    }
-    
-    // Email validation
-    if (!validateEmail(DOM.audienceEmail.value)) {
-        showFieldError(DOM.audienceEmail, 'Please enter a valid email address');
-        isValid = false;
-    } else {
-        clearFieldError(DOM.audienceEmail);
-    }
-    
-    // Phone validation
-    if (!validatePhone(DOM.audiencePhone.value)) {
-        showFieldError(DOM.audiencePhone, 'Please enter your phone number');
-        isValid = false;
-    } else {
-        clearFieldError(DOM.audiencePhone);
-    }
-    
-    return isValid;
-}
-
-function showFieldError(field, message) {
-    const formGroup = field.closest('.form-group');
-    const errorSpan = formGroup.querySelector('.error-message');
-    
-    formGroup.classList.add('error');
-    errorSpan.textContent = message;
-    errorSpan.classList.add('show');
-}
-
-function clearFieldError(field) {
-    const formGroup = field.closest('.form-group');
-    const errorSpan = formGroup.querySelector('.error-message');
-    
-    formGroup.classList.remove('error');
-    errorSpan.textContent = '';
-    errorSpan.classList.remove('show');
-}
-
-function clearFormErrors(form) {
-    form.querySelectorAll('.form-group').forEach(group => {
-        group.classList.remove('error');
+// ==================== SEND TO GOOGLE SHEETS =========
+async function postToSheet(data) {
+  try {
+    await fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors", // Apps Script limitation — response can't be read
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(data)
     });
-    form.querySelectorAll('.error-message').forEach(error => {
-        error.textContent = '';
-        error.classList.remove('show');
+    // With no-cors we can't read the response body, so we optimistically assume success
+    return true;
+  } catch (err) {
+    console.error("Sheet POST error:", err);
+    return false;
+  }
+}
+
+// ==================== EMAIL CONFIRMATION ============
+async function sendEmailConfirmation(email, name, type) {
+  try {
+    await fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ action: "sendEmail", email, name, type })
     });
+  } catch (e) {
+    console.warn("Email notification failed (non-critical):", e);
+  }
 }
 
-// ========================================
-// Form Submissions
-// ========================================
-
-async function handleTeamSubmit(e) {
+// ==================== FORM SUBMIT HANDLER ===========
+document.querySelectorAll("form").forEach(form => {
+  form.addEventListener("submit", async function(e) {
     e.preventDefault();
-    
-    if (!validateTeamForm()) {
-        return;
+    if (!validateForm(this)) return;
+
+    const type = this.dataset.type;
+
+    // FIX: Use FormData with named inputs — this now works because all inputs have name=""
+    const formData = new FormData(this);
+    const data = {};
+    formData.forEach((value, key) => { data[key] = value; });
+
+    // Add metadata
+    data.formType  = type;
+    data.timestamp = new Date().toISOString();
+
+    // FIX: Send the access code so GAS can verify it server-side
+    if (type === "band")       data.accessCode = BAND_PASS;
+    if (type === "production") data.accessCode = PROD_PASS;
+
+    // Add any fields not captured by FormData (dropdowns already have name attrs now, but belt-and-suspenders)
+    if (type === "band") {
+      data.roleCategory = document.getElementById("roleCategory").value;
+      data.specificRole  = document.getElementById("roleOptions").value;
     }
-    
-    // Check client-side duplicate
-    if (registeredTeamMembers.has(DOM.teamName.value)) {
-        showErrorModal('This team member has already registered.');
-        return;
+
+    // Show a loading state on the submit button
+    const btn = this.querySelector("button[type='submit']");
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting…';
+    btn.disabled = true;
+
+    // Submit to Google Sheets
+    await postToSheet(data);
+
+    // FIX: Extract name correctly from named field
+    const name = (data.fullName || "Worshiper").trim();
+
+    // Send email confirmation
+    await sendEmailConfirmation(data.email, name, type);
+
+    // Populate success page
+    document.getElementById("successName").innerText = `✨ ${name}`;
+
+    // FIX: Use real WhatsApp links from the config object
+    document.getElementById("whatsappLink").href = WHATSAPP_LINKS[type] || "#";
+
+    // Transition to success page
+    const container = document.querySelector(".container");
+    container.style.opacity = "0";
+    container.style.transition = "opacity 0.4s ease";
+    setTimeout(() => {
+      container.style.display = "none";
+      document.getElementById("successPage").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 400);
+
+    // Restore button (in case user goes back)
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  });
+});
+
+// ==================== ADMIN DASHBOARD ===============
+window.toggleAdmin = function() {
+  document.getElementById("adminPanel").classList.toggle("hidden");
+};
+
+window.unlockAdmin = async function() {
+  const pass = document.getElementById("adminPass").value;
+  if (pass !== ADMIN_PASS) {
+    alert("⛔ Wrong admin password");
+    return;
+  }
+
+  document.getElementById("adminData").innerHTML = "<p style='color:white'>Loading registrations…</p>";
+
+  try {
+    const response = await fetch(GAS_URL + "?action=getAll");
+    const data = await response.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      document.getElementById("adminData").innerHTML = "<p style='color:white'>No registrations yet.</p>";
+      return;
     }
-    
-    const submitBtn = DOM.teamSubmit;
-    const btnText = submitBtn.querySelector('.btn-text');
-    const btnLoader = submitBtn.querySelector('.btn-loader');
-    
-    // Show loading state
-    submitBtn.disabled = true;
-    btnText.classList.add('hidden');
-    btnLoader.classList.remove('hidden');
-    
-    const payload = {
-        type: 'team',
-        accessCode: CONFIG.ACCESS_CODE,
-        category: DOM.teamCategory.value,
-        name: DOM.teamName.value,
-        email: DOM.teamEmail.value,
-        phone: DOM.teamPhone.value
-    };
-    
-    try {
-        const response = await fetch(CONFIG.WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors', // Required for Google Apps Script
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-        
-        // Note: With no-cors mode, we can't read the response
-        // Assume success if no error is thrown
-        
-        // Add to registered set
-        registeredTeamMembers.add(DOM.teamName.value);
-        
-        // Show success modal
-        showSuccessModal({
-            name: DOM.teamName.value,
-            role: getCategoryLabel(DOM.teamCategory.value)
-        });
-        
-        // Reset form
-        DOM.teamForm.reset();
-        DOM.teamName.disabled = true;
-        DOM.teamName.innerHTML = '<option value="">Select category first</option>';
-        
-        // Refresh category dropdown to show updated registered status
-        handleCategoryChange({ target: DOM.teamCategory });
-        
-    } catch (error) {
-        console.error('Registration error:', error);
-        showErrorModal('Unable to complete registration. Please try again.');
-    } finally {
-        // Reset button state
-        submitBtn.disabled = false;
-        btnText.classList.remove('hidden');
-        btnLoader.classList.add('hidden');
-    }
-}
 
-async function handleAudienceSubmit(e) {
-    e.preventDefault();
-    
-    if (!validateAudienceForm()) {
-        return;
-    }
-    
-    const submitBtn = DOM.audienceSubmit;
-    const btnText = submitBtn.querySelector('.btn-text');
-    const btnLoader = submitBtn.querySelector('.btn-loader');
-    
-    // Show loading state
-    submitBtn.disabled = true;
-    btnText.classList.add('hidden');
-    btnLoader.classList.remove('hidden');
-    
-    const payload = {
-        type: 'audience',
-        fullName: DOM.audienceName.value.trim(),
-        email: DOM.audienceEmail.value.trim(),
-        phone: DOM.audiencePhone.value.trim()
-    };
-    
-    try {
-        const response = await fetch(CONFIG.WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors', // Required for Google Apps Script
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-        
-        // Note: With no-cors mode, we can't read the response
-        // Assume success if no error is thrown
-        
-        // Show success modal
-        showSuccessModal({
-            name: DOM.audienceName.value.trim(),
-            role: null
-        });
-        
-        // Reset form
-        DOM.audienceForm.reset();
-        
-    } catch (error) {
-        console.error('Registration error:', error);
-        showErrorModal('Unable to complete registration. Please try again.');
-    } finally {
-        // Reset button state
-        submitBtn.disabled = false;
-        btnText.classList.remove('hidden');
-        btnLoader.classList.add('hidden');
-    }
-}
+    let html = `<table id='adminTable'>
+      <tr>
+        <th>Timestamp</th><th>Type</th><th>Name</th>
+        <th>Email</th><th>Phone</th><th>Role / Details</th>
+      </tr>`;
 
-// ========================================
-// Modals
-// ========================================
+    data.forEach(row => {
+      html += `<tr>
+        <td>${row.timestamp || ''}</td>
+        <td>${row.formType || ''}</td>
+        <td>${row.fullName || row.name || ''}</td>
+        <td>${row.email || ''}</td>
+        <td>${row.phone || ''}</td>
+        <td>${row.specificRole || row.role || row.address || ''}</td>
+      </tr>`;
+    });
 
-function showSuccessModal(data) {
-    let detailsHTML = `<p class="modal-name">${data.name}</p>`;
-    
-    if (data.role) {
-        detailsHTML += `<span class="modal-role">${data.role}</span>`;
-    }
-    
-    DOM.modalDetails.innerHTML = detailsHTML;
-    DOM.successModal.classList.add('show');
-}
+    html += "</table>";
+    document.getElementById("adminData").innerHTML = html;
+  } catch (err) {
+    document.getElementById("adminData").innerHTML =
+      `<p style='color:#f88'>Error loading data. Make sure your GAS is deployed with "Anyone" access and CORS is handled. (${err.message})</p>`;
+  }
+};
 
-function showErrorModal(message) {
-    DOM.errorMessage.textContent = message;
-    DOM.errorModal.classList.add('show');
-}
+// ==================== MODAL CLOSE ON BACKDROP CLICK =
+window.addEventListener("click", (e) => {
+  const modal = document.getElementById("passwordModal");
+  if (e.target === modal) {
+    modal.style.display = "none";
+    currentSection = "";
+  }
+});
 
-function closeModals() {
-    DOM.successModal.classList.remove('show');
-    DOM.errorModal.classList.remove('show');
-}
+// ==================== INIT ==========================
+document.addEventListener("DOMContentLoaded", () => {
+  // Set initial role dropdown placeholder
+  const roleSel = document.getElementById("roleOptions");
+  if (roleSel) roleSel.innerHTML = '<option value="">– choose category first –</option>';
 
-// ========================================
-// Utility Functions
-// ========================================
-
-function getCategoryLabel(category) {
-    const labels = {
-        lead_vocal: 'Lead Vocal',
-        instrumentalist: 'Instrumentalist',
-        bgvs: 'Background Vocals'
-    };
-    return labels[category] || category;
-}
-
-// ========================================
-// Start Application
-// ========================================
-
-document.addEventListener('DOMContentLoaded', init);
+  // Live clear of error state as user types/selects
+  document.querySelectorAll("input, select").forEach(el => {
+    el.addEventListener("input", function() {
+      this.classList.remove("input-error");
+      const errDiv = this.closest("form")?.querySelector(`.validation-error[data-for="${this.name}"]`);
+      if (errDiv) errDiv.style.display = "none";
+    });
+    el.addEventListener("change", function() {
+      this.classList.remove("input-error");
+    });
+  });
+});
