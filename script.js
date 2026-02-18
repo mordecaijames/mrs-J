@@ -10,7 +10,7 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbyppFrFJbPN0kqnu1jvbnF8
 const WHATSAPP_LINKS = {
   band:       "https://chat.whatsapp.com/GgfdCO9gXytGIT69W4foB1K",
   audience:   "https://chat.whatsapp.com/GgfdCO9gXytGIT69W4foB1",
-  production: "https://chat.whatsapp.com/GgfdCO9gXytGIT69W4foB1"
+  production: "https://chat.whatsapp.com/Lxru3Jver31LqSskrUoiXY?mode=gi_t"
 };
 
 // ==================== GLOBAL ======================
