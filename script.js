@@ -4,7 +4,7 @@ const PROD_PASS = "prod2026";
 const ADMIN_PASS = "admin123"; // change before going live
 
 // ⚠️ Replace with your deployed Google Apps Script URL
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyppFrFJbPN0kqnu1jvbnF8R7J2HEJtUrbGRZm3ZEDh7esSOA7TlvxdF9bz0Ro3OlFo/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxU55uG-aqh3xcJpv07iE9wPC0nqGdpGT2_8QahWNQoqyzmwKNTeBCSCUSi6zSG1H6B/exec";
 
 // ⚠️ Replace these with your real WhatsApp group invite links
 const WHATSAPP_LINKS = {
