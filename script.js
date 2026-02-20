@@ -74,7 +74,7 @@ function showSection(id) {
 // ==================== ROLE DROPDOWN =================
 window.updateRoles = function() {
   const rolesMap = {
-    instrumentalist: ["Acoustic Guitar", "Keyboardist", "Aux Keys", "Drummer", "Bass Guitar", "Lead Guitar"],
+    instrumentalist: ["Acoustic Guitar", "Keyboardist", "Aux Keys", "Drummer", "Bass Guitar", "Violin", "Lead Guitar"],
     vocals:          ["Lead Vocals", "Tenor", "Soprano", "Alto"]
   };
   const cat = document.getElementById("roleCategory").value;
