@@ -8,8 +8,8 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbxU55uG-aqh3xcJpv07iE9w
 
 // ⚠️ Replace these with your real WhatsApp group invite links
 const WHATSAPP_LINKS = {
-  band:       "https://chat.whatsapp.com/GgfdCO9gXytGIT69W4foB1K",
-  audience:   "https://chat.whatsapp.com/GgfdCO9gXytGIT69W4foB1",
+  band:       "https://chat.whatsapp.com/GgfdCO9gXytGIT69W4foB1?mode=gi_t",
+  audience:   "https://chat.whatsapp.com/GgfdCO9gXytGIT69W4foB1?mode=gi_t",
   production: "https://chat.whatsapp.com/Lxru3Jver31LqSskrUoiXY?mode=gi_t"
 };
 
