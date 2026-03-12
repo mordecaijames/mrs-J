@@ -71,7 +71,6 @@ body {
   100% { opacity: 1;   transform: scale(1.03); }
 }
 
-/* Floating candle-light particles via pseudo-elements on body */
 body::before {
   content: '';
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -103,7 +102,6 @@ header {
   100% { opacity: 1; transform: translateY(0); }
 }
 
-/* Ornate top divider */
 header::before {
   content: '— ✦ —';
   display: block;
@@ -152,7 +150,6 @@ header p {
   animation: fadeIn 1.5s 0.5s both;
 }
 
-/* Bottom ornament */
 header::after {
   content: '';
   display: block;
@@ -211,10 +208,7 @@ header::after {
   position: relative;
 }
 
-.tabs button i {
-  font-size: 0.9rem;
-  transition: color 0.3s;
-}
+.tabs button i { font-size: 0.9rem; transition: color 0.3s; }
 
 .tabs button:hover {
   color: var(--gold-light);
@@ -250,7 +244,6 @@ header::after {
   100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* Corner ornaments */
 .form::before, .form::after {
   content: '';
   position: absolute;
@@ -259,16 +252,9 @@ header::after {
   border-style: solid;
   opacity: 0.3;
 }
-.form::before {
-  top: 14px; left: 14px;
-  border-width: 1px 0 0 1px;
-}
-.form::after {
-  bottom: 14px; right: 14px;
-  border-width: 0 1px 1px 0;
-}
+.form::before { top: 14px; left: 14px; border-width: 1px 0 0 1px; }
+.form::after  { bottom: 14px; right: 14px; border-width: 0 1px 1px 0; }
 
-/* Gold top accent bar */
 .form > h2::before {
   content: '';
   display: block;
@@ -292,13 +278,8 @@ header::after {
   text-shadow: 0 0 30px rgba(201,168,76,0.3);
 }
 
-.form h2 i {
-  font-size: 1.2rem;
-  color: var(--gold);
-  font-style: normal;
-}
+.form h2 i { font-size: 1.2rem; color: var(--gold); font-style: normal; }
 
-/* ---- Inputs & Selects ---- */
 .form label {
   display: block;
   font-family: 'Jost', sans-serif;
@@ -338,17 +319,9 @@ header::after {
   padding-right: 2.5rem;
 }
 
-.form select option {
-  background: #151520;
-  color: var(--text);
-  font-family: 'Jost', sans-serif;
-}
+.form select option { background: #151520; color: var(--text); font-family: 'Jost', sans-serif; }
 
-.form input::placeholder {
-  color: rgba(240, 230, 208, 0.35);
-  font-weight: 300;
-  font-style: italic;
-}
+.form input::placeholder { color: rgba(240, 230, 208, 0.35); font-weight: 300; font-style: italic; }
 
 .form input:focus,
 .form select:focus,
@@ -359,7 +332,6 @@ header::after {
   color: var(--gold-pale);
 }
 
-/* ---- Submit Button ---- */
 .form button[type="submit"] {
   width: 100%;
   background: linear-gradient(135deg, rgba(201,168,76,0.15) 0%, rgba(201,168,76,0.05) 100%);
@@ -403,7 +375,6 @@ header::after {
 
 .form button[type="submit"]:active { transform: translateY(0); }
 
-/* ---- Validation Errors ---- */
 .validation-error {
   color: #E07070;
   font-family: 'Jost', sans-serif;
@@ -589,7 +560,6 @@ header::after {
   margin-bottom: 0.5rem;
 }
 
-/* Ornate divider */
 .success-divider {
   width: 120px;
   height: 1px;
@@ -635,17 +605,8 @@ header::after {
 
 .event-detail-card p:last-child { border-bottom: none; }
 
-.event-detail-card i {
-  color: var(--gold);
-  font-size: 0.9rem;
-  margin-top: 0.15rem;
-  min-width: 16px;
-}
-
-.event-detail-card strong {
-  color: var(--gold-pale);
-  font-weight: 400;
-}
+.event-detail-card i { color: var(--gold); font-size: 0.9rem; margin-top: 0.15rem; min-width: 16px; }
+.event-detail-card strong { color: var(--gold-pale); font-weight: 400; }
 
 .whatsapp-glow {
   display: inline-flex;
@@ -680,42 +641,57 @@ header::after {
 
 /* ====== ADMIN PANEL ====== */
 #adminPanel {
-  background: rgba(8, 8, 16, 0.85);
+  background: rgba(8, 8, 16, 0.88);
   backdrop-filter: blur(20px);
   padding: 2.5rem;
-  border-radius: 4px;
+  border-radius: 6px;
   margin: 2rem auto;
-  max-width: 960px;
+  max-width: 980px;
   color: var(--text);
   border: 1px solid var(--border);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.04) inset;
 }
 
+/* --- Login area --- */
 #adminPanel h2 {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.8rem;
   font-weight: 300;
   color: var(--gold-light);
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.4rem;
   font-style: italic;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
 }
 
-#adminPanel input {
-  padding: 0.8rem 1.2rem;
+.admin-login-row {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#adminPass {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.85rem 1.2rem;
   background: rgba(201,168,76,0.05);
   border: 1px solid var(--border);
   border-radius: 3px;
   color: var(--text);
   font-family: 'Jost', sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   outline: none;
-  margin-right: 0.8rem;
   transition: border-color 0.25s;
+  letter-spacing: 0.2em;
 }
-#adminPanel input:focus { border-color: var(--gold); }
+#adminPass:focus { border-color: var(--gold); }
 
+#adminLoginArea > button,
 #adminPanel > button {
-  padding: 0.8rem 1.5rem;
+  padding: 0.85rem 1.6rem;
   background: transparent;
   border: 1px solid var(--gold);
   border-radius: 3px;
@@ -726,30 +702,227 @@ header::after {
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.25s;
+  white-space: nowrap;
 }
-#adminPanel > button:hover { background: rgba(201,168,76,0.12); }
+#adminLoginArea > button:hover,
+#adminPanel > button:hover { background: rgba(201,168,76,0.12); box-shadow: 0 0 20px rgba(201,168,76,0.15); }
 
-#adminTable { width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.85rem; }
-#adminTable th {
-  background: rgba(201,168,76,0.12);
-  border: 1px solid var(--border);
-  padding: 0.7rem 1rem;
-  text-align: left;
-  font-family: 'Jost', sans-serif;
-  font-weight: 400;
-  letter-spacing: 0.1em;
-  color: var(--gold);
-  text-transform: uppercase;
-  font-size: 0.75rem;
+/* --- Expenditure area header --- */
+.admin-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1.8rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid rgba(201,168,76,0.15);
 }
-#adminTable td {
-  border: 1px solid rgba(201,168,76,0.08);
-  padding: 0.7rem 1rem;
+
+.admin-event-tag {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  border: 1px solid rgba(201,168,76,0.18);
+  padding: 0.35rem 0.9rem;
+  border-radius: 100px;
+}
+
+/* --- Entry card --- */
+.exp-entry-card {
+  background: rgba(201,168,76,0.03);
+  border: 1px solid rgba(201,168,76,0.18);
+  border-radius: 4px;
+  padding: 1.6rem 1.8rem 1.4rem;
+  margin-bottom: 1.8rem;
+  position: relative;
+}
+
+.exp-entry-title {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.exp-grid {
+  display: grid;
+  grid-template-columns: 160px 1fr 90px 110px 130px;
+  gap: 0.8rem;
+  align-items: end;
+}
+
+.exp-field--wide { grid-column: span 1; }
+
+.exp-field label {
+  display: block;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.65;
+  margin-bottom: 0.4rem;
+  padding-left: 0.2rem;
+}
+
+.exp-field input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  background: rgba(255,245,210,0.04);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-bottom: 1px solid rgba(201,168,76,0.35);
+  border-radius: 3px;
+  color: var(--text);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 300;
+  outline: none;
+  transition: all 0.25s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.exp-field input::placeholder { color: rgba(240,230,208,0.3); font-style: italic; }
+
+.exp-field input:focus {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.06);
+  box-shadow: 0 0 0 1px rgba(201,168,76,0.15);
+  color: var(--gold-pale);
+}
+
+.exp-field input.input-error {
+  border-color: rgba(200,80,80,0.6) !important;
+  background: rgba(200,80,80,0.05) !important;
+}
+
+/* Date input calendar icon colour */
+.exp-field input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7) sepia(1) hue-rotate(10deg) saturate(3);
+  cursor: pointer;
+}
+
+.exp-add-btn {
+  margin-top: 1.1rem;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05));
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  color: var(--gold-light);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.exp-add-btn:hover {
+  background: linear-gradient(135deg, rgba(201,168,76,0.25), rgba(201,168,76,0.12));
+  box-shadow: 0 0 25px rgba(201,168,76,0.2);
+  color: var(--gold-pale);
+  transform: translateY(-1px);
+}
+.exp-add-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+/* --- Table --- */
+.exp-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 4px;
+}
+
+.exp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+}
+
+.exp-table thead tr {
+  background: rgba(201,168,76,0.1);
+}
+
+.exp-table th {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  font-weight: 400;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+  white-space: nowrap;
+}
+
+.exp-table td {
+  padding: 0.75rem 1rem;
+  color: var(--text-dim);
+  font-weight: 300;
+  border-bottom: 1px solid rgba(201,168,76,0.06);
+  vertical-align: middle;
+}
+
+.exp-table tbody tr:last-child td { border-bottom: none; }
+.exp-table tbody tr:hover td { background: rgba(201,168,76,0.04); color: var(--text); }
+
+.exp-amount-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold-pale);
+  font-weight: 400;
+}
+
+.exp-total-row td {
+  padding: 0.9rem 1rem;
+  border-top: 1px solid rgba(201,168,76,0.25);
+  background: rgba(201,168,76,0.06);
+}
+
+.exp-total-val {
+  color: var(--gold-light) !important;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.exp-empty {
+  text-align: center;
+  color: var(--text-dim);
+  padding: 2rem !important;
+  font-style: italic;
+  font-size: 0.88rem;
+}
+
+.exp-refresh-btn {
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 3px;
   color: var(--text-dim);
   font-family: 'Jost', sans-serif;
-  font-weight: 300;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  transition: all 0.25s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-#adminTable tr:hover td { background: rgba(201,168,76,0.03); color: var(--text); }
+.exp-refresh-btn:hover { border-color: var(--gold); color: var(--gold); }
 
 /* ====== FOOTER ====== */
 footer {
@@ -828,17 +1001,20 @@ footer > p:first-of-type {
   padding-right: 2rem;
 }
 
-.credit a {
-  color: rgba(201,168,76,0.5);
-  text-decoration: none;
-  transition: color 0.25s;
-}
+.credit a { color: rgba(201,168,76,0.5); text-decoration: none; transition: color 0.25s; }
 .credit a:hover { color: var(--gold-light); }
 
 /* ====== UTILITIES ====== */
 .hidden { display: none !important; }
 
 /* ====== RESPONSIVE ====== */
+@media (max-width: 860px) {
+  .exp-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .exp-field--wide { grid-column: 1 / -1; }
+}
+
 @media (max-width: 480px) {
   header { padding: 3rem 1rem 1.5rem; }
   header h1 { font-size: 2.4rem; }
@@ -849,6 +1025,10 @@ footer > p:first-of-type {
   .success { padding: 2.5rem 1.5rem; margin: 0.5rem 1rem 2rem; }
   .event-detail-card { padding: 1.4rem 1.2rem; }
   .whatsapp-glow { font-size: 0.75rem; padding: 0.9rem 1.5rem; }
+  #adminPanel { padding: 1.5rem 1rem; }
+  .exp-grid { grid-template-columns: 1fr; }
+  .admin-login-row { flex-direction: column; }
+  #adminPass { min-width: unset; width: 100%; }
 }
 
 @media (max-width: 360px) {
