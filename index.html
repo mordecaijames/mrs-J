@@ -29,14 +29,12 @@
 
 <main class="container" id="mainContainer">
   <div class="tabs">
-    <!-- FIX: added class="tab-btn" to all tab buttons -->
     <button class="tab-btn" onclick="openSection('band')"><i class="fas fa-drum"></i> Band Reg</button>
     <button class="tab-btn" onclick="openSection('audience')"><i class="fas fa-heart"></i> Audience Reg</button>
     <button class="tab-btn" onclick="openSection('production')"><i class="fas fa-sliders-h"></i> Production Reg</button>
   </div>
 
   <!-- BAND FORM -->
-  <!-- FIX: added name attributes to all inputs so FormData works -->
   <form id="band" class="form hidden" data-type="band">
     <h2><i class="fas fa-music"></i> Band registration</h2>
     <input type="text" name="fullName" placeholder="Full name *" required>
@@ -138,32 +136,114 @@
   <p>Live Recording</p>
   <div class="event-detail-card" id="successDetails">
     <p><i class="fas fa-map-pin"></i> <strong>Venue:</strong> Templebreed International Kaduna, Gwari Avenue Barnawa</p>
-    <p><i class="fas fa-calendar-alt"></i> <strong>Date:</strong>Friday, 22nd May, 2026</p>
+    <p><i class="fas fa-calendar-alt"></i> <strong>Date:</strong> Friday, 22nd May, 2026</p>
     <p><i class="fas fa-clock"></i> <strong>Time:</strong> 8:30 PM (prompt)</p>
     <p><i class="fas fa-door-open"></i> <strong>Doors open:</strong> 7:30 PM</p>
   </div>
-  <a href="https://chat.whatsapp.com/GgfdCO9gXytGIT69W4foB1?mode=gi_t" id="whatsappLink" class="whatsapp-glow" target="_blank"><i class="fab fa-whatsapp"></i> Join WhatsApp Group</a>
+  <a href="https://chat.whatsapp.com/GgfdCO9gXytGIT69W4foB1?mode=gi_t" id="whatsappLink" class="whatsapp-glow" target="_blank">
+    <i class="fab fa-whatsapp"></i> Join WhatsApp Group
+  </a>
   <p style="margin-top:1.2rem; font-size:0.78rem; letter-spacing:0.15em; text-transform:uppercase; opacity:0.5;">📩 Confirmation email sent</p>
 </div>
 
-<!-- ADMIN DASHBOARD (hidden) -->
+<!-- ===================== ADMIN PANEL ===================== -->
 <div id="adminPanel" class="hidden">
-  <h2><i class="fas fa-shield-alt"></i> Admin Dashboard</h2>
-  <input type="password" id="adminPass" placeholder="Admin password" onkeydown="if(event.key==='Enter') unlockAdmin()">
-  <button onclick="unlockAdmin()">Access</button>
-  <div id="adminData" style="margin-top:2rem;"></div>
-</div>
+
+  <!-- LOGIN AREA -->
+  <div id="adminLoginArea">
+    <h2><i class="fas fa-shield-alt"></i> Admin Access</h2>
+    <div class="admin-login-row">
+      <input type="password" id="adminPass" placeholder="Admin password"
+             onkeydown="if(event.key==='Enter') unlockAdmin()">
+      <button onclick="unlockAdmin()">Enter</button>
+    </div>
+    <p id="adminPassError" style="color:#E07070;margin-top:0.8rem;font-family:'Jost',sans-serif;font-size:0.8rem;"></p>
+  </div>
+
+  <!-- EXPENDITURE TRACKER (shown after correct password) -->
+  <div id="adminExpenseArea" class="hidden">
+    <div class="admin-header-row">
+      <h2><i class="fas fa-receipt"></i> Expenditure Tracker</h2>
+      <span class="admin-event-tag">#AltarAndThrone · Live Recording</span>
+    </div>
+
+    <!-- ADD NEW ENTRY FORM -->
+    <div class="exp-entry-card">
+      <h4 class="exp-entry-title"><i class="fas fa-plus-circle"></i> New Entry</h4>
+      <div class="exp-grid">
+        <div class="exp-field">
+          <label>Date *</label>
+          <input type="date" id="expDate">
+        </div>
+        <div class="exp-field exp-field--wide">
+          <label>Description *</label>
+          <input type="text" id="expDesc" placeholder="e.g. Sound equipment hire">
+        </div>
+        <div class="exp-field">
+          <label>Qty *</label>
+          <input type="number" id="expQty" placeholder="1" min="0" step="any">
+        </div>
+        <div class="exp-field">
+          <label>Unit *</label>
+          <input type="text" id="expUnit" placeholder="e.g. pcs / hrs">
+        </div>
+        <div class="exp-field">
+          <label>Amount (₦) *</label>
+          <input type="number" id="expAmount" placeholder="0.00" min="0" step="0.01">
+        </div>
+      </div>
+      <button id="addExpBtn" class="exp-add-btn" onclick="addExpenditure()">
+        <i class="fas fa-plus"></i> Add
+      </button>
+    </div>
+
+    <!-- EXPENDITURE TABLE -->
+    <div class="exp-table-wrap">
+      <table class="exp-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th style="text-align:center">Qty</th>
+            <th style="text-align:center">Unit</th>
+            <th style="text-align:right">Amount (₦)</th>
+          </tr>
+        </thead>
+        <tbody id="expTableBody">
+          <tr>
+            <td colspan="5" class="exp-empty">Loading…</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="exp-total-row">
+            <td colspan="4" style="text-align:right; font-weight:500; letter-spacing:0.1em; color:var(--gold);">TOTAL</td>
+            <td id="expTotal" class="exp-amount-cell exp-total-val">₦ 0.00</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <!-- Refresh -->
+    <div style="text-align:right;margin-top:0.8rem;">
+      <button class="exp-refresh-btn" onclick="loadExpenditures()">
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+</div><!-- end #adminPanel -->
 
 <footer>
   <p style="font-size:1.3rem; letter-spacing:2px;">#AltarAndThrone</p>
   <div class="socials">
     <a href="https://www.facebook.com/JacintaSamson07" target="_blank"><i class="fab fa-facebook-f"></i> Facebook</a>
-    <!-- FIX: added https:// to TikTok URL -->
     <a href="https://www.tiktok.com/@jacinta_samson" target="_blank"><i class="fab fa-tiktok"></i> TikTok</a>
     <a href="https://www.instagram.com/glory_minstrel?igsh=MXMyN2JheHJvcjZzNg==" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
     <a href="https://www.youtube.com/@JacintaSamson" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
   </div>
-  <p class="credit"><a href="https://wa.me/2349077673110" target="_blank">✧ Created by Great Man Mordecai ✧</a> | <a href="#" onclick="toggleAdmin(); return false;">Admin</a></p>
+  <p class="credit">
+    <a href="https://wa.me/2349077673110" target="_blank">✧ Created by Great Man Mordecai ✧</a> |
+    <a href="#" onclick="toggleAdmin(); return false;">Admin</a>
+  </p>
 </footer>
 
 <script src="script.js"></script>
