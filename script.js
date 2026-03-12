@@ -1,10 +1,11 @@
+
 // ==================== CONFIG ======================
-const BAND_PASS = "band2026";
-const PROD_PASS = "prod2026";
-const ADMIN_PASS = "admin123"; // change before going live
+const BAND_PASS  = "band2026";
+const PROD_PASS  = "prod2026";
+const ADMIN_PASS = "expenditure"; // updated admin password
 
 // ⚠️ Replace with your deployed Google Apps Script URL
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxU55uG-aqh3xcJpv07iE9wPC0nqGdpGT2_8QahWNQoqyzmwKNTeBCSCUSi6zSG1H6B/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwOqlCiL6lkesL0vHaU8mTTrUytbBxoTTIdTe-TZ3x2M9pu87FNmSVQQwjvrF85aks/exec";
 
 // ⚠️ Replace these with your real WhatsApp group invite links
 const WHATSAPP_LINKS = {
@@ -23,7 +24,6 @@ window.openSection = function(section) {
     document.getElementById("passwordModal").style.display = "flex";
     document.getElementById("passInput").value = "";
     document.getElementById("passError").innerText = "";
-    // Focus the input for quick typing
     setTimeout(() => document.getElementById("passInput").focus(), 100);
   } else {
     showSection(section);
@@ -31,7 +31,7 @@ window.openSection = function(section) {
 };
 
 window.verifyPassword = function() {
-  const val = document.getElementById("passInput").value.trim();
+  const val    = document.getElementById("passInput").value.trim();
   const errorEl = document.getElementById("passError");
 
   if (currentSection === "band" && val === BAND_PASS) {
@@ -49,25 +49,17 @@ window.verifyPassword = function() {
   currentSection = "";
 };
 
-// FIX: showSection now correctly targets .tab-btn class
 function showSection(id) {
-  // Hide all forms
   document.querySelectorAll(".form").forEach(f => f.classList.add("hidden"));
-
-  // Show the requested form
   const targetForm = document.getElementById(id);
   if (targetForm) targetForm.classList.remove("hidden");
 
-  // Update active tab highlight
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  // Match button by its onclick attribute value
   document.querySelectorAll(".tab-btn").forEach(b => {
     if (b.getAttribute("onclick") && b.getAttribute("onclick").includes(`'${id}'`)) {
       b.classList.add("active");
     }
   });
-
-  // Scroll to the form smoothly
   targetForm && targetForm.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -77,7 +69,7 @@ window.updateRoles = function() {
     instrumentalist: ["Acoustic Guitar", "Keyboardist", "Aux Keys", "Drummer", "Bass Guitar", "Violin", "Lead Guitar"],
     vocals:          ["Lead Vocals", "Tenor", "Soprano", "Alto"]
   };
-  const cat = document.getElementById("roleCategory").value;
+  const cat        = document.getElementById("roleCategory").value;
   const roleSelect = document.getElementById("roleOptions");
   roleSelect.innerHTML = "";
 
@@ -86,7 +78,6 @@ window.updateRoles = function() {
     return;
   }
 
-  // Add a blank default option
   const defaultOpt = document.createElement("option");
   defaultOpt.value = "";
   defaultOpt.textContent = "– select role –";
@@ -103,23 +94,18 @@ window.updateRoles = function() {
 // ==================== FORM VALIDATION ===============
 function validateForm(form) {
   let valid = true;
-
-  // Clear all previous errors
   form.querySelectorAll(".validation-error").forEach(e => e.style.display = "none");
   form.querySelectorAll(".input-error").forEach(e => e.classList.remove("input-error"));
 
-  // Check all required fields
   form.querySelectorAll("[required]").forEach(inp => {
     if (!inp.value.trim()) {
       inp.classList.add("input-error");
-      // Show corresponding error message using data-for matching inp.name
       const errDiv = form.querySelector(`.validation-error[data-for="${inp.name}"]`);
       if (errDiv) errDiv.style.display = "block";
       valid = false;
     }
   });
 
-  // Email format check
   const emailField = form.querySelector('input[type="email"]');
   if (emailField && emailField.value.trim()) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -131,7 +117,6 @@ function validateForm(form) {
     }
   }
 
-  // Phone format check (7–20 digits, optional +, spaces, dashes, parens)
   const phoneField = form.querySelector('input[type="tel"]');
   if (phoneField && phoneField.value.trim()) {
     if (!phoneField.value.trim().match(/^[\d\s+\-()\[\]]{7,20}$/)) {
@@ -142,19 +127,12 @@ function validateForm(form) {
     }
   }
 
-  // Band-specific: require role category + specific role selection
   const type = form.dataset.type;
   if (type === "band") {
-    const cat = document.getElementById("roleCategory").value;
+    const cat  = document.getElementById("roleCategory").value;
     const role = document.getElementById("roleOptions").value;
-    if (!cat) {
-      document.getElementById("roleCategory").classList.add("input-error");
-      valid = false;
-    }
-    if (!role) {
-      document.getElementById("roleOptions").classList.add("input-error");
-      valid = false;
-    }
+    if (!cat)  { document.getElementById("roleCategory").classList.add("input-error"); valid = false; }
+    if (!role) { document.getElementById("roleOptions").classList.add("input-error");  valid = false; }
   }
 
   return valid;
@@ -165,11 +143,10 @@ async function postToSheet(data) {
   try {
     await fetch(GAS_URL, {
       method: "POST",
-      mode: "no-cors", // Apps Script limitation — response can't be read
+      mode: "no-cors",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams(data)
     });
-    // With no-cors we can't read the response body, so we optimistically assume success
     return true;
   } catch (err) {
     console.error("Sheet POST error:", err);
@@ -197,51 +174,37 @@ document.querySelectorAll("form").forEach(form => {
     e.preventDefault();
     if (!validateForm(this)) return;
 
-    const type = this.dataset.type;
-
-    // FIX: Use FormData with named inputs — this now works because all inputs have name=""
+    const type     = this.dataset.type;
     const formData = new FormData(this);
-    const data = {};
+    const data     = {};
     formData.forEach((value, key) => { data[key] = value; });
 
-    // Add metadata
     data.formType  = type;
     data.timestamp = new Date().toISOString();
 
-    // FIX: Send the access code so GAS can verify it server-side
     if (type === "band")       data.accessCode = BAND_PASS;
     if (type === "production") data.accessCode = PROD_PASS;
 
-    // Add any fields not captured by FormData (dropdowns already have name attrs now, but belt-and-suspenders)
     if (type === "band") {
       data.roleCategory = document.getElementById("roleCategory").value;
       data.specificRole  = document.getElementById("roleOptions").value;
     }
 
-    // Show a loading state on the submit button
-    const btn = this.querySelector("button[type='submit']");
+    const btn          = this.querySelector("button[type='submit']");
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting…';
-    btn.disabled = true;
+    btn.disabled  = true;
 
-    // Submit to Google Sheets
     await postToSheet(data);
 
-    // FIX: Extract name correctly from named field
     const name = (data.fullName || "Worshiper").trim();
-
-    // Send email confirmation
     await sendEmailConfirmation(data.email, name, type);
 
-    // Populate success page
     document.getElementById("successName").innerText = `✨ ${name}`;
-
-    // FIX: Use real WhatsApp links from the config object
     document.getElementById("whatsappLink").href = WHATSAPP_LINKS[type] || "#";
 
-    // Transition to success page
     const container = document.querySelector(".container");
-    container.style.opacity = "0";
+    container.style.opacity    = "0";
     container.style.transition = "opacity 0.4s ease";
     setTimeout(() => {
       container.style.display = "none";
@@ -249,59 +212,123 @@ document.querySelectorAll("form").forEach(form => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }, 400);
 
-    // Restore button (in case user goes back)
     btn.innerHTML = originalText;
-    btn.disabled = false;
+    btn.disabled  = false;
   });
 });
 
 // ==================== ADMIN DASHBOARD ===============
 window.toggleAdmin = function() {
-  document.getElementById("adminPanel").classList.toggle("hidden");
+  const panel = document.getElementById("adminPanel");
+  panel.classList.toggle("hidden");
+  // Reset to login view when reopening
+  if (!panel.classList.contains("hidden")) {
+    document.getElementById("adminLoginArea").classList.remove("hidden");
+    document.getElementById("adminExpenseArea").classList.add("hidden");
+    document.getElementById("adminPass").value = "";
+  }
 };
 
 window.unlockAdmin = async function() {
-  const pass = document.getElementById("adminPass").value;
+  const pass = document.getElementById("adminPass").value.trim();
   if (pass !== ADMIN_PASS) {
-    alert("⛔ Wrong admin password");
+    document.getElementById("adminPassError").innerText = "⛔ Wrong password. Try again.";
+    document.getElementById("adminPass").value = "";
+    document.getElementById("adminPass").focus();
+    return;
+  }
+  document.getElementById("adminPassError").innerText = "";
+  document.getElementById("adminLoginArea").classList.add("hidden");
+  document.getElementById("adminExpenseArea").classList.remove("hidden");
+  await loadExpenditures();
+};
+
+// ==================== EXPENDITURE: ADD ===============
+window.addExpenditure = async function() {
+  const date        = document.getElementById("expDate").value.trim();
+  const description = document.getElementById("expDesc").value.trim();
+  const qty         = document.getElementById("expQty").value.trim();
+  const unit        = document.getElementById("expUnit").value.trim();
+  const amount      = document.getElementById("expAmount").value.trim();
+
+  // Validate
+  const fields = [
+    { el: document.getElementById("expDate"),   val: date,        msg: "Date is required" },
+    { el: document.getElementById("expDesc"),   val: description, msg: "Description is required" },
+    { el: document.getElementById("expQty"),    val: qty,         msg: "Qty is required" },
+    { el: document.getElementById("expUnit"),   val: unit,        msg: "Unit is required" },
+    { el: document.getElementById("expAmount"), val: amount,      msg: "Amount is required" },
+  ];
+
+  let ok = true;
+  fields.forEach(f => {
+    f.el.classList.remove("input-error");
+    if (!f.val) { f.el.classList.add("input-error"); ok = false; }
+  });
+  if (!ok) return;
+
+  if (isNaN(parseFloat(amount))) {
+    document.getElementById("expAmount").classList.add("input-error");
     return;
   }
 
-  document.getElementById("adminData").innerHTML = "<p style='color:white'>Loading registrations…</p>";
+  const addBtn = document.getElementById("addExpBtn");
+  addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  addBtn.disabled = true;
+
+  await postToSheet({
+    action: "addExpenditure",
+    accessCode: ADMIN_PASS,
+    date, description, qty, unit,
+    amount: parseFloat(amount).toFixed(2)
+  });
+
+  // Clear inputs
+  ["expDate","expDesc","expQty","expUnit","expAmount"].forEach(id => {
+    document.getElementById(id).value = "";
+    document.getElementById(id).classList.remove("input-error");
+  });
+
+  addBtn.innerHTML = '<i class="fas fa-plus"></i> Add';
+  addBtn.disabled = false;
+
+  await loadExpenditures();
+};
+
+// ==================== EXPENDITURE: LOAD =============
+async function loadExpenditures() {
+  const tbody  = document.getElementById("expTableBody");
+  const totEl  = document.getElementById("expTotal");
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--text-dim);"><i class="fas fa-spinner fa-spin"></i> Loading…</td></tr>`;
 
   try {
-    const response = await fetch(GAS_URL + "?action=getAll");
-    const data = await response.json();
+    const res  = await fetch(GAS_URL + "?action=getExpenditures");
+    const rows = await res.json();
 
-    if (!Array.isArray(data) || data.length === 0) {
-      document.getElementById("adminData").innerHTML = "<p style='color:white'>No registrations yet.</p>";
+    if (!Array.isArray(rows) || rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="exp-empty">No expenditures recorded yet.</td></tr>`;
+      totEl.innerText = "₦ 0.00";
       return;
     }
 
-    let html = `<table id='adminTable'>
-      <tr>
-        <th>Timestamp</th><th>Type</th><th>Name</th>
-        <th>Email</th><th>Phone</th><th>Role / Details</th>
+    let total = 0;
+    tbody.innerHTML = rows.map((r, i) => {
+      const amt = parseFloat(r.amount) || 0;
+      total += amt;
+      return `<tr>
+        <td>${r.date || ''}</td>
+        <td>${r.description || ''}</td>
+        <td style="text-align:center">${r.qty || ''}</td>
+        <td style="text-align:center">${r.unit || ''}</td>
+        <td class="exp-amount-cell">₦ ${amt.toLocaleString('en-NG', {minimumFractionDigits:2})}</td>
       </tr>`;
+    }).join('');
 
-    data.forEach(row => {
-      html += `<tr>
-        <td>${row.timestamp || ''}</td>
-        <td>${row.formType || ''}</td>
-        <td>${row.fullName || row.name || ''}</td>
-        <td>${row.email || ''}</td>
-        <td>${row.phone || ''}</td>
-        <td>${row.specificRole || row.role || row.address || ''}</td>
-      </tr>`;
-    });
-
-    html += "</table>";
-    document.getElementById("adminData").innerHTML = html;
+    totEl.innerText = `₦ ${total.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
   } catch (err) {
-    document.getElementById("adminData").innerHTML =
-      `<p style='color:#f88'>Error loading data. Make sure your GAS is deployed with "Anyone" access and CORS is handled. (${err.message})</p>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="color:#f88;text-align:center;padding:1rem;">Error loading data: ${err.message}</td></tr>`;
   }
-};
+}
 
 // ==================== MODAL CLOSE ON BACKDROP CLICK =
 window.addEventListener("click", (e) => {
@@ -314,11 +341,9 @@ window.addEventListener("click", (e) => {
 
 // ==================== INIT ==========================
 document.addEventListener("DOMContentLoaded", () => {
-  // Set initial role dropdown placeholder
   const roleSel = document.getElementById("roleOptions");
   if (roleSel) roleSel.innerHTML = '<option value="">– choose category first –</option>';
 
-  // Live clear of error state as user types/selects
   document.querySelectorAll("input, select").forEach(el => {
     el.addEventListener("input", function() {
       this.classList.remove("input-error");
